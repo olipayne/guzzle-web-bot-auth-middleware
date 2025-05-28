@@ -88,7 +88,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->assertStringContainsString('created=', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('expires=', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('keyid="' . $kid . '"', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('alg="eddsa"', $receivedHeaders['signature-input']);
+            $this->assertStringContainsString('alg="ed25519"', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('tag="web-bot-auth"', $receivedHeaders['signature-input']);
             
             $this->assertArrayHasKey('signature', $receivedHeaders);

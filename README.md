@@ -23,7 +23,7 @@ composer require olipayne/guzzle-web-bot-auth-middleware
 
 ## Prerequisites & Setup (Ed25519)
 
-To use this middleware, you need an Ed25519 private key, its corresponding public key (in JWK format hosted publicly), and a `keyid` (JWK Thumbprint of the public key). The middleware uses `alg: "eddsa"` in the `Signature-Input` header.
+To use this middleware, you need an Ed25519 private key, its corresponding public key (in JWK format hosted publicly), and a `keyid` (JWK Thumbprint of the public key). The middleware uses `alg: "ed25519"` in the `Signature-Input` header.
 
 ### Easiest Setup: All-in-One Ed25519 Key Generation Script
 
@@ -65,7 +65,7 @@ This package includes a utility script to generate everything you need for Ed255
         "crv": "Ed25519",
         "x": "...base64url_encoded_public_key...",
         "kid": "YOUR_GENERATED_ED25519_KEY_ID",
-        "alg": "EdDSA",
+        "alg": "ed25519",
         "use": "sig"
     }
     ...
@@ -85,7 +85,7 @@ This package includes a utility script to generate everything you need for Ed255
           "crv": "Ed25519",
           "x": "...base64url_encoded_public_key...",
           "kid": "YOUR_GENERATED_ED25519_KEY_ID",
-          "alg": "EdDSA",
+          "alg": "ed25519",
           "use": "sig"
         }
       ]
@@ -169,12 +169,12 @@ try {
 ### Covered Components & Algorithm
 
 *   **Covered Components:** `("@authority" "signature-agent")`
-*   **Signature Algorithm (in `Signature-Input`):** `alg="eddsa"` (implies Ed25519 with this library)
-*   **JWK Algorithm (`alg` in JWK):** `EdDSA`
+*   **Signature Algorithm (in `Signature-Input`):** `alg="ed25519"` (implies Ed25519 with this library)
+*   **JWK Algorithm (`alg` in JWK):** `Ed25519`
 
 ## How it Works
 
-The middleware uses `sodium_crypto_sign_detached` for Ed25519 signatures. The `Signature-Input` header includes an `alg="eddsa"` parameter. The JWK for the public key uses `kty: "OKP"` (Octet Key Pair) and `crv: "Ed25519"`.
+The middleware uses `sodium_crypto_sign_detached` for Ed25519 signatures. The `Signature-Input` header includes an `alg="ed25519"` parameter. The JWK for the public key uses `kty: "OKP"` (Octet Key Pair) and `crv: "Ed25519"`.
 
 ## Contributing
 

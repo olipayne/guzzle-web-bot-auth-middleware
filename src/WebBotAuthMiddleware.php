@@ -13,7 +13,7 @@ class WebBotAuthMiddleware
     private string $signatureAgent;
     private string $tag;
     private int $expiresInSeconds;
-    private string $alg = 'eddsa'; // Algorithm identifier for EdDSA with Ed25519
+    private string $alg = 'ed25519'; // Algorithm identifier for Ed25519 with Ed25519
 
     public function __construct(
         string $base64Ed25519PrivateKeyOrPath,
