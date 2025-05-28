@@ -73,7 +73,7 @@ $jwk = [
     'crv' => 'Ed25519',
     'x'   => $x_b64url,
     'kid' => $kid,
-    'alg' => 'EdDSA',
+    'alg' => 'Ed25519',
     'use' => 'sig'
 ];
 

@@ -74,7 +74,7 @@ $jwk = [
     'crv' => 'Ed25519',
     'x'   => $x_b64url,
     'kid' => $kid,
-    'alg' => 'EdDSA', // Algorithm for use with this key (note: Signature-Input uses 'eddsa', JWK often 'EdDSA')
+    'alg' => 'Ed25519', // Algorithm for use with this key (note: Signature-Input uses 'ed25519', JWK often 'Ed25519')
     'use' => 'sig'
 ];
 
