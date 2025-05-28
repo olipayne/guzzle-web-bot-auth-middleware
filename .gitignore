@@ -1,0 +1,44 @@
+/vendor/
+/composer.lock
+
+# PHPDoc
+phpdoc-cache/
+
+# PHPUnit
+/build/
+/coverage/
+phpunit.result.cache
+.phpunit.result.cache
+
+# Cache files
+.cache/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled assets
+/public/build/
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+
+# Local configuration files
+config/local/
+
+# Key files (if not already covered by specific names in bin/)
+*.key
+*.pem 

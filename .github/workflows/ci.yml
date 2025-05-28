@@ -1,0 +1,47 @@
+# .github/workflows/ci.yml
+
+name: PHP Composer CI
+
+on:
+  push:
+    branches: [ "main", "master" ] # Adjust to your main branch name
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "main", "master" ] # Adjust to your main branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-versions: ['7.4', '8.0', '8.1', '8.2'] # Test against multiple PHP versions
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: sodium # Ensure sodium is enabled
+        tools: composer # Optionally install composer via this action
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php-versions }}-
+
+    - name: Install dependencies
+      # if: steps.composer-cache.outputs.cache-hit != 'true' # Only run if cache is not hit (optional)
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run tests
+      run: vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-text
