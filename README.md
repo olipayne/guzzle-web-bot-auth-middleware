@@ -5,7 +5,7 @@
 
 # Guzzle Web Bot Auth Middleware (Ed25519 Edition)
 
-A PHP Guzzle middleware for signing HTTP requests using HTTP Message Signatures (RFC 9421), specifically tailored for the `web-bot-auth` profile as discussed by Cloudflare. This version uses Ed25519 signatures via the `libsodium` PHP extension.
+A PHP Guzzle middleware for signing HTTP requests using HTTP Message Signatures (RFC 9421), specifically tailored for the `web-bot-auth` profile as discussed by [Cloudflare](https://blog.cloudflare.com/web-bot-auth/). This version uses Ed25519 signatures via the `libsodium` PHP extension.
 
 ## Requirements
 
