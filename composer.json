@@ -1,6 +1,6 @@
 {
     "name": "olipayne/guzzle-web-bot-auth-middleware",
-    "description": "Guzzle middleware for HTTP Message Signatures (Ed25519) with web-bot-auth.",
+    "description": "Guzzle middleware for HTTP Message Signatures (RFC9421) with web-bot-auth.",
     "type": "library",
     "keywords": [
         "guzzle",
