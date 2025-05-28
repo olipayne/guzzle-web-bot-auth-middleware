@@ -9,7 +9,7 @@ A PHP Guzzle middleware for signing HTTP requests using HTTP Message Signatures 
 
 ## Requirements
 
-*   PHP 7.2+ (libsodium is bundled with PHP 7.2+)
+*   PHP 7.4+ (libsodium is bundled with PHP 7.2+, but this package uses features from 7.4+)
 *   The `sodium` PHP extension must be enabled.
 *   GuzzleHTTP 7.0+
 
