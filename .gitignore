@@ -1,5 +1,4 @@
 /vendor/
-/composer.lock
 
 # PHPDoc
 phpdoc-cache/
@@ -9,6 +8,10 @@ phpdoc-cache/
 /coverage/
 phpunit.result.cache
 .phpunit.result.cache
+
+# Local static-analysis/style overrides
+phpstan.neon
+.php-cs-fixer.cache
 
 # Cache files
 .cache/
@@ -41,4 +44,4 @@ config/local/
 
 # Key files (if not already covered by specific names in bin/)
 *.key
-*.pem 
+*.pem
