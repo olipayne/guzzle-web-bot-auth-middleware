@@ -180,6 +180,18 @@ The middleware uses `sodium_crypto_sign_detached` for Ed25519 signatures. The `S
 
 Contributions are welcome! Please feel free to submit pull requests or open issues.
 
+## Testing
+
+```bash
+composer test
+```
+
+Optional live integration test:
+
+```bash
+composer test:integration
+```
+
 ## Releases
 
 See `RELEASE.md` for the tag-based release and Packagist publishing process.
