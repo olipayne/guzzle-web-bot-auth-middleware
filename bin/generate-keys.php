@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // bin/generate-keys.php (for Ed25519)
 
 if (!extension_loaded('sodium')) {
@@ -74,17 +76,23 @@ $jwk = [
     'crv' => 'Ed25519',
     'x'   => $x_b64url,
     'kid' => $kid,
-    'alg' => 'EdDSA', // Algorithm for use with this key (note: Signature-Input uses 'eddsa', JWK often 'EdDSA')
+    'alg' => 'Ed25519',
     'use' => 'sig'
 ];
+
+try {
+    $jwkJson = json_encode($jwk, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+} catch (\JsonException $e) {
+    echo "Error: Failed to encode JWK JSON: {$e->getMessage()}\n";
+    exit(1);
+}
 
 echo "--- Configuration for WebBotAuthMiddleware (Ed25519) ---\n";
 echo "Base64 Encoded Ed25519 Private Key (content of '{$privateKeyFilename}', for middleware constructor):
 {$base64SecretKey}\n\n";
 echo "JWK Thumbprint (use as 'keyId'):\n{$kid}\n\n";
-echo "Full Ed25519 JWK (host this at your 'signatureAgent' URL, typically in a JWKSet):
-";
-echo json_encode($jwk, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n\n";
+echo "Full Ed25519 JWK (host this at your 'signatureAgent' URL, typically in a JWKSet):\n";
+echo $jwkJson . "\n\n";
 echo "Instructions for use:\n";
 echo "1. The base64 encoded private key (content of '{$privateKeyFilename}' or printed above) is passed to the Guzzle middleware.
 ";
@@ -94,4 +102,4 @@ echo "3. The 'Full Ed25519 JWK' JSON above should be made available at your 'sig
    (e.g., in a 'keys' array within a JSON object at https://your-bot.example.com/.well-known/jwks.json)
 ";
 
-exit(0); 
+exit(0);

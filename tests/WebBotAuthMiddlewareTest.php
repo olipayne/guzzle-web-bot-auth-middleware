@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Olipayne\GuzzleWebBotAuth\Tests;
 
 use GuzzleHttp\Psr7\Request;
@@ -107,7 +109,7 @@ class WebBotAuthMiddlewareTest extends TestCase
             $signatureInput = $req->getHeaderLine('Signature-Input');
             $this->assertStringStartsWith('sig=(', $signatureInput);
             $this->assertStringContainsString('keyid="' . $this->validKeyId . '"', $signatureInput);
-            $this->assertStringContainsString('alg="eddsa"', $signatureInput);
+            $this->assertStringContainsString('alg="ed25519"', $signatureInput);
             $this->assertStringContainsString('tag="web-bot-auth"', $signatureInput);
             $this->assertStringContainsString('created=', $signatureInput);
             $this->assertStringContainsString('expires=', $signatureInput);

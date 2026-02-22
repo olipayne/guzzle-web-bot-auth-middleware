@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // bin/generate-jwk.php (for Ed25519 from existing base64 public key)
 
 if (!extension_loaded('sodium')) {
@@ -73,15 +75,21 @@ $jwk = [
     'crv' => 'Ed25519',
     'x'   => $x_b64url,
     'kid' => $kid,
-    'alg' => 'EdDSA',
+    'alg' => 'Ed25519',
     'use' => 'sig'
 ];
+
+try {
+    $jwkJson = json_encode($jwk, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+} catch (\JsonException $e) {
+    echo "Error: Failed to encode JWK JSON: {$e->getMessage()}\n";
+    exit(1);
+}
 
 echo "--- Ed25519 JWK Details ---\n";
 echo "Input Base64 Public Key: {$base64PublicKey}\n\n";
 echo "JWK Thumbprint (kid):\n{$kid}\n\n";
-echo "Full Ed25519 JWK (for your .well-known/jwks.json file):
-";
-echo json_encode($jwk, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+echo "Full Ed25519 JWK (for your .well-known/jwks.json file):\n";
+echo $jwkJson . "\n";
 
-exit(0); 
+exit(0);

@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Olipayne\GuzzleWebBotAuth;
 
 use Psr\Http\Message\RequestInterface;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Uri;
 
 class WebBotAuthMiddleware
 {
+    private const SIGNATURE_ALG = 'ed25519';
+
     private string $base64Ed25519PrivateKey;
     private string $keyId; // JWK Thumbprint of the Ed25519 public key
     private string $signatureAgent;
     private string $tag;
     private int $expiresInSeconds;
-    private string $alg = 'eddsa'; // Algorithm identifier for EdDSA with Ed25519
 
     public function __construct(
         string $base64Ed25519PrivateKeyOrPath,
@@ -67,13 +69,13 @@ class WebBotAuthMiddleware
                 'created=' . $created,
                 'expires=' . $expires,
                 'keyid="' . $this->keyId . '"',
-                'alg="' . $this->alg . '"', // Algorithm parameter
+                'alg="' . self::SIGNATURE_ALG . '"',
                 'tag="' . $this->tag . '"',
             ];
             
             $signatureInputString = 'sig=(' . implode(' ', $signatureInputParams) . ')';
 
-            $signatureBase = $this->createSignatureBase($request, $signatureInputString, $created, $expires);
+            $signatureBase = $this->createSignatureBase($request, $signatureInputString);
             $signature = $this->sign($signatureBase);
 
             $request = $request->withHeader('Signature-Agent', $this->signatureAgent)
@@ -84,7 +86,7 @@ class WebBotAuthMiddleware
         };
     }
 
-    private function createSignatureBase(RequestInterface $request, string $signatureInputHeaderValueWithLabel, int $created, int $expires): string
+    private function createSignatureBase(RequestInterface $request, string $signatureInputHeaderValueWithLabel): string
     {
         $authority = $request->getUri()->getAuthority();
 

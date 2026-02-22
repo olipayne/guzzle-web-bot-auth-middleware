@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Olipayne\GuzzleWebBotAuth\Tests;
 
 use GuzzleHttp\Client;
@@ -48,7 +50,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->markTestSkipped('Libsodium extension is not available.');
         }
 
-        list($base64SecretKey, $kid) = $this->generateTestKeys();
+        [$base64SecretKey, $kid] = $this->generateTestKeys();
         $signatureAgentUrl = 'https://example.com/.well-known/jwks.json'; // Dummy URL for this test
 
         $stack = HandlerStack::create();
@@ -71,7 +73,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $lines = explode("\n", trim($bodyContents));
             foreach ($lines as $line) {
                 if (strpos($line, ':') !== false) {
-                    list($name, $value) = explode(':', $line, 2);
+                    [$name, $value] = explode(':', $line, 2);
                     $receivedHeaders[strtolower(trim($name))] = trim($value);
                 }
             }
@@ -88,7 +90,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->assertStringContainsString('created=', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('expires=', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('keyid="' . $kid . '"', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('alg="eddsa"', $receivedHeaders['signature-input']);
+            $this->assertStringContainsString('alg="ed25519"', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('tag="web-bot-auth"', $receivedHeaders['signature-input']);
             
             $this->assertArrayHasKey('signature', $receivedHeaders);
