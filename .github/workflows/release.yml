@@ -32,6 +32,12 @@ jobs:
       - name: Run test suite
         run: composer test
 
+      - name: Run code style check
+        run: composer lint
+
+      - name: Run static analysis
+        run: composer phpstan
+
       - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

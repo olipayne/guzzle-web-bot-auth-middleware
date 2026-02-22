@@ -67,7 +67,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->assertEquals(200, $response->getStatusCode());
 
             $bodyContents = $response->getBody()->getContents();
-            
+
             // Parse plain text headers
             $receivedHeaders = [];
             $lines = explode("\n", trim($bodyContents));
@@ -92,7 +92,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->assertStringContainsString('keyid="' . $kid . '"', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('alg="ed25519"', $receivedHeaders['signature-input']);
             $this->assertStringContainsString('tag="web-bot-auth"', $receivedHeaders['signature-input']);
-            
+
             $this->assertArrayHasKey('signature', $receivedHeaders);
             $this->assertStringStartsWith('sig=', $receivedHeaders['signature']);
             // Validate base64 encoding of the signature value itself
@@ -101,7 +101,7 @@ class WebBotAuthIntegrationTest extends TestCase
             $this->assertNotEmpty(base64_decode($signatureValue, true), 'Signature value is not valid base64 (strict decode failed).');
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
-            $this->fail("Request to debug endpoint failed: " . $e->getMessage());
+            $this->fail('Request to debug endpoint failed: ' . $e->getMessage());
         }
     }
-} 
+}

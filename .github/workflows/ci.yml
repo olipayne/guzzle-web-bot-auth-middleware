@@ -45,3 +45,11 @@ jobs:
 
     - name: Run unit tests
       run: composer test
+
+    - name: Run code style check
+      if: matrix.php-versions == '8.4'
+      run: composer lint
+
+    - name: Run static analysis
+      if: matrix.php-versions == '8.4'
+      run: composer phpstan

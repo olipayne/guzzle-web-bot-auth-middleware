@@ -14,7 +14,15 @@ composer install
 
 ```bash
 composer validate --strict
+composer lint
+composer phpstan
 composer test
+```
+
+3. Auto-fix coding style before committing when needed:
+
+```bash
+composer lint:fix
 ```
 
 ## Pull Requests
