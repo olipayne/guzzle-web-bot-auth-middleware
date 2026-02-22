@@ -43,5 +43,5 @@ jobs:
       # if: steps.composer-cache.outputs.cache-hit != 'true' # Only run if cache is not hit (optional)
       run: composer install --prefer-dist --no-progress --no-interaction
 
-    - name: Run tests
-      run: vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-text
+    - name: Run unit tests
+      run: composer test

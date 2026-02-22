@@ -4,8 +4,11 @@
          bootstrap="vendor/autoload.php"
          colors="true">
     <testsuites>
-        <testsuite name="Guzzle Web Bot Auth Middleware Test Suite">
-            <directory suffix="Test.php">./tests</directory>
+        <testsuite name="Unit">
+            <file>./tests/WebBotAuthMiddlewareTest.php</file>
+        </testsuite>
+        <testsuite name="Integration">
+            <file>./tests/WebBotAuthIntegrationTest.php</file>
         </testsuite>
     </testsuites>
     <coverage processUncoveredFiles="true">
