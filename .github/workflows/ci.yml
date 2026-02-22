@@ -15,10 +15,10 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4'] # Test against multiple PHP versions
+        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'] # Test against multiple PHP versions
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -32,7 +32,7 @@ jobs:
 
     - name: Cache Composer packages
       id: composer-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: vendor
         key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
@@ -41,7 +41,7 @@ jobs:
 
     - name: Install dependencies
       # if: steps.composer-cache.outputs.cache-hit != 'true' # Only run if cache is not hit (optional)
-      run: composer install --prefer-dist --no-progress
+      run: composer install --prefer-dist --no-progress --no-interaction
 
     - name: Run tests
       run: vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-text

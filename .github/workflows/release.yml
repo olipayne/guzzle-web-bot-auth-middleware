@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: sodium
+          tools: composer
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run test suite
+        run: composer test
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${GITHUB_REF_NAME}" --generate-notes --verify-tag
+
+      - name: Notify Packagist (optional)
+        if: ${{ secrets.PACKAGIST_PACKAGE_URL != '' && secrets.PACKAGIST_TOKEN != '' }}
+        env:
+          PACKAGIST_PACKAGE_URL: ${{ secrets.PACKAGIST_PACKAGE_URL }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+        run: |
+          curl -fsS -X POST "https://packagist.org/api/update-package" \
+            -H "content-type:application/json" \
+            -H "authorization:Bearer ${PACKAGIST_TOKEN}" \
+            -d "{\"repository\":{\"url\":\"${PACKAGIST_PACKAGE_URL}\"}}"
