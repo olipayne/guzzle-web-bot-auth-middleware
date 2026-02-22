@@ -28,6 +28,9 @@
         "ext-sodium": "*"
     },
     "require-dev": {
+        "php-cs-fixer/shim": "^3.89",
+        "phpstan/phpstan": "^1.12",
+        "phpstan/phpstan-strict-rules": "^1.6",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
@@ -41,8 +44,19 @@
         }
     },
     "scripts": {
+        "lint": "php-cs-fixer fix --dry-run --diff --verbose",
+        "lint:fix": "php-cs-fixer fix --verbose",
+        "phpstan": "phpstan analyse --configuration phpstan.neon.dist",
+        "qa": [
+            "@lint",
+            "@phpstan",
+            "@test"
+        ],
         "test": "phpunit --configuration phpunit.xml.dist --testsuite Unit",
         "test:integration": "phpunit --configuration phpunit.xml.dist --testsuite Integration",
         "test:coverage": "phpunit --configuration phpunit.xml.dist --testsuite Unit --coverage-text"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

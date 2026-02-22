@@ -188,6 +188,13 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 composer test
 ```
 
+Static analysis and style checks:
+
+```bash
+composer phpstan
+composer lint
+```
+
 Optional live integration test:
 
 ```bash

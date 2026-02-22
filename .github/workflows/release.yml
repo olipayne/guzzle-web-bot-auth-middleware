@@ -27,10 +27,16 @@ jobs:
         run: composer validate --strict
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer update --prefer-dist --no-progress --no-interaction
 
       - name: Run test suite
         run: composer test
+
+      - name: Run code style check
+        run: composer lint
+
+      - name: Run static analysis
+        run: composer phpstan
 
       - name: Create GitHub release
         env:

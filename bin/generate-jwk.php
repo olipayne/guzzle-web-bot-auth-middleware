@@ -37,8 +37,8 @@ if (empty($base64PublicKey)) {
 
 $publicKeyBytes = base64_decode($base64PublicKey, true);
 if ($publicKeyBytes === false || strlen($publicKeyBytes) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
-    echo "Error: Invalid Ed25519 public key. Must be a base64 encoded string representing " . SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES . " bytes.\n";
-    echo "Received length after base64 decode: " . ($publicKeyBytes === false ? 'decode_failed' : strlen($publicKeyBytes)) . " bytes.\n";
+    echo 'Error: Invalid Ed25519 public key. Must be a base64 encoded string representing ' . SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES . " bytes.\n";
+    echo 'Received length after base64 decode: ' . ($publicKeyBytes === false ? 'decode_failed' : strlen($publicKeyBytes)) . " bytes.\n";
     exit(1);
 }
 

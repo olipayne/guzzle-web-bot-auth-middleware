@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Olipayne\GuzzleWebBotAuth\Tests;
 
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\RequestInterface;
 use Olipayne\GuzzleWebBotAuth\WebBotAuthMiddleware;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 
 class WebBotAuthMiddlewareTest extends TestCase
 {
@@ -107,6 +107,18 @@ class WebBotAuthMiddlewareTest extends TestCase
         );
     }
 
+    public function testConstructorWithNonHttpsSignatureAgentThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Signature agent URL must use https.');
+
+        new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            $this->validKeyId,
+            'http://example.com/.well-known/http-message-signatures-directory'
+        );
+    }
+
     public function testConstructorWithZeroExpiryThrowsException()
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -168,7 +180,7 @@ class WebBotAuthMiddlewareTest extends TestCase
 
             $this->assertTrue($req->hasHeader('Signature'));
             $this->assertStringStartsWith('sig=', $req->getHeaderLine('Signature'));
-            
+
             // Return a dummy promise
             return new \GuzzleHttp\Promise\FulfilledPromise(new \GuzzleHttp\Psr7\Response());
         };
@@ -198,7 +210,7 @@ class WebBotAuthMiddlewareTest extends TestCase
             $this->assertTrue($req->hasHeader('Signature-Input'));
             $signatureInput = $req->getHeaderLine('Signature-Input');
             $this->assertStringContainsString('tag="' . $customTag . '"', $signatureInput);
-            
+
             // Check expires calculation
             preg_match('/created=(\d+)/', $signatureInput, $createdMatches);
             preg_match('/expires=(\d+)/', $signatureInput, $expiresMatches);
@@ -211,7 +223,7 @@ class WebBotAuthMiddlewareTest extends TestCase
             $this->assertGreaterThanOrEqual($startTime, $created);
             $this->assertLessThanOrEqual($startTime + 5, $created); // Allow 5s skew for created
             $this->assertEquals($created + $customExpires, $expires);
-            
+
             return new \GuzzleHttp\Promise\FulfilledPromise(new \GuzzleHttp\Psr7\Response());
         };
 

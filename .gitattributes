@@ -19,6 +19,11 @@ LICENSE*  eol=lf
 
 # Paths to ignore when creating a zip/tar.gz archive from git
 /.github export-ignore
+/.editorconfig export-ignore
 /.gitattributes export-ignore
+/.php-cs-fixer.dist.php export-ignore
 /.php-cs-fixer.cache export-ignore
-phpunit.xml.dist export-ignore 
+/.phpunit.result.cache export-ignore
+/phpstan.neon.dist export-ignore
+/tests export-ignore
+/phpunit.xml.dist export-ignore
