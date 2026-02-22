@@ -40,8 +40,7 @@ jobs:
           ${{ runner.os }}-php-${{ matrix.php-versions }}-
 
     - name: Install dependencies
-      # if: steps.composer-cache.outputs.cache-hit != 'true' # Only run if cache is not hit (optional)
-      run: composer install --prefer-dist --no-progress --no-interaction
+      run: composer update --prefer-dist --no-progress --no-interaction
 
     - name: Run unit tests
       run: composer test
