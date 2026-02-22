@@ -35,11 +35,15 @@ jobs:
         run: gh release create "${GITHUB_REF_NAME}" --generate-notes --verify-tag
 
       - name: Notify Packagist (optional)
-        if: ${{ secrets.PACKAGIST_PACKAGE_URL != '' && secrets.PACKAGIST_TOKEN != '' }}
         env:
           PACKAGIST_PACKAGE_URL: ${{ secrets.PACKAGIST_PACKAGE_URL }}
           PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
         run: |
+          if [ -z "${PACKAGIST_PACKAGE_URL}" ] || [ -z "${PACKAGIST_TOKEN}" ]; then
+            echo "Packagist secrets are not configured; skipping notification."
+            exit 0
+          fi
+
           curl -fsS -X POST "https://packagist.org/api/update-package" \
             -H "content-type:application/json" \
             -H "authorization:Bearer ${PACKAGIST_TOKEN}" \
