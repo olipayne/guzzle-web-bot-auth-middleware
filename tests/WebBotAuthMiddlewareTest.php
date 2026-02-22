@@ -83,6 +83,57 @@ class WebBotAuthMiddlewareTest extends TestCase
         );
     }
 
+    public function testConstructorWithEmptyKeyIdThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Key ID cannot be empty.');
+
+        new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            '   ',
+            $this->validSignatureAgent
+        );
+    }
+
+    public function testConstructorWithInvalidSignatureAgentThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Signature agent must be a valid absolute URL.');
+
+        new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            $this->validKeyId,
+            'not-a-url'
+        );
+    }
+
+    public function testConstructorWithZeroExpiryThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('expiresInSeconds must be greater than zero.');
+
+        new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            $this->validKeyId,
+            $this->validSignatureAgent,
+            'web-bot-auth',
+            0
+        );
+    }
+
+    public function testConstructorWithHeaderNewlineValueThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Tag cannot contain CR/LF characters.');
+
+        new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            $this->validKeyId,
+            $this->validSignatureAgent,
+            "valid\r\ninvalid"
+        );
+    }
+
     private function getDummyRequest(string $method = 'GET', string $url = 'https://example.com/path'): Request
     {
         return new Request($method, $url);
@@ -194,5 +245,25 @@ class WebBotAuthMiddlewareTest extends TestCase
         $fn($request, $options)->wait();
     }
 
-    // TODO: Add more tests here
-} 
+    public function testInvokeWithRelativeUriThrowsException()
+    {
+        $middleware = new WebBotAuthMiddleware(
+            $this->validBase64Ed25519Seed,
+            $this->validKeyId,
+            $this->validSignatureAgent
+        );
+
+        $request = new Request('GET', '/relative-path');
+        $options = [];
+
+        $handler = function (RequestInterface $req, array $opt) {
+            return new \GuzzleHttp\Promise\FulfilledPromise(new \GuzzleHttp\Psr7\Response());
+        };
+
+        $fn = $middleware($handler);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Request URI must contain an authority for signing.');
+        $fn($request, $options);
+    }
+}

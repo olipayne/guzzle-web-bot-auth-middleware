@@ -39,8 +39,7 @@ class WebBotAuthMiddleware
             $this->base64Ed25519PrivateKey = trim(preg_replace('/\s+/', '', $base64Ed25519PrivateKeyOrPath));
         }
 
-        // Validate if it looks like a base64 string, crude check
-        if (!preg_match('/^[a-zA-Z0-9\+\/\=]+$/', $this->base64Ed25519PrivateKey)) {
+        if (!preg_match('/^[A-Za-z0-9+\/]*={0,2}$/', $this->base64Ed25519PrivateKey)) {
             throw new \InvalidArgumentException('Private key does not appear to be a valid base64 encoded string.');
         }
         
@@ -50,6 +49,29 @@ class WebBotAuthMiddleware
                 'Decoded Ed25519 private key must be either ' . SODIUM_CRYPTO_SIGN_SECRETKEYBYTES . ' bytes (secret key) or ' . 
                 SODIUM_CRYPTO_SIGN_SEEDBYTES . ' bytes (seed). Received length: ' . strlen($decodedKey) . ' bytes.'
             );
+        }
+
+        $keyId = trim($keyId);
+        if ($keyId == '') {
+            throw new \InvalidArgumentException('Key ID cannot be empty.');
+        }
+        $this->assertNoNewlines($keyId, 'Key ID');
+
+        $signatureAgent = trim($signatureAgent);
+        $signatureAgentParts = parse_url($signatureAgent);
+        if ($signatureAgentParts === false || !isset($signatureAgentParts['scheme'], $signatureAgentParts['host'])) {
+            throw new \InvalidArgumentException('Signature agent must be a valid absolute URL.');
+        }
+        $this->assertNoNewlines($signatureAgent, 'Signature agent');
+
+        $tag = trim($tag);
+        if ($tag == '') {
+            throw new \InvalidArgumentException('Tag cannot be empty.');
+        }
+        $this->assertNoNewlines($tag, 'Tag');
+
+        if ($expiresInSeconds <= 0) {
+            throw new \InvalidArgumentException('expiresInSeconds must be greater than zero.');
         }
 
         $this->keyId = $keyId;
@@ -68,14 +90,15 @@ class WebBotAuthMiddleware
                 '("@authority" "signature-agent")',
                 'created=' . $created,
                 'expires=' . $expires,
-                'keyid="' . $this->keyId . '"',
+                'keyid=' . $this->encodeStructuredFieldString($this->keyId),
                 'alg="' . self::SIGNATURE_ALG . '"',
-                'tag="' . $this->tag . '"',
+                'tag=' . $this->encodeStructuredFieldString($this->tag),
             ];
-            
-            $signatureInputString = 'sig=(' . implode(' ', $signatureInputParams) . ')';
 
-            $signatureBase = $this->createSignatureBase($request, $signatureInputString);
+            $signatureParamsValue = implode(' ', $signatureInputParams);
+            $signatureInputString = 'sig=(' . $signatureParamsValue . ')';
+
+            $signatureBase = $this->createSignatureBase($request, $signatureParamsValue);
             $signature = $this->sign($signatureBase);
 
             $request = $request->withHeader('Signature-Agent', $this->signatureAgent)
@@ -86,9 +109,12 @@ class WebBotAuthMiddleware
         };
     }
 
-    private function createSignatureBase(RequestInterface $request, string $signatureInputHeaderValueWithLabel): string
+    private function createSignatureBase(RequestInterface $request, string $signatureParamsValue): string
     {
         $authority = $request->getUri()->getAuthority();
+        if ($authority === '') {
+            throw new \InvalidArgumentException('Request URI must contain an authority for signing.');
+        }
 
         $coveredComponents = [
             '"@authority"' => $authority,
@@ -99,10 +125,6 @@ class WebBotAuthMiddleware
         foreach ($coveredComponents as $name => $value) {
             $baseStringLines[] = $name . ': ' . $value;
         }
-        
-        preg_match('/^sig=\((.*)\)$/', $signatureInputHeaderValueWithLabel, $matches);
-        $signatureParamsValue = $matches[1] ?? '';
-
         $baseStringLines[] = '"@signature-params": ' . $signatureParamsValue;
 
         return implode("\n", $baseStringLines);
@@ -131,5 +153,17 @@ class WebBotAuthMiddleware
             throw new \RuntimeException('Ed25519 signing failed: ' . $e->getMessage(), 0, $e);
         }
         return $signature;
+    }
+
+    private function encodeStructuredFieldString(string $value): string
+    {
+        return '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $value) . '"';
+    }
+
+    private function assertNoNewlines(string $value, string $fieldName): void
+    {
+        if (preg_match('/[\r\n]/', $value) === 1) {
+            throw new \InvalidArgumentException($fieldName . ' cannot contain CR/LF characters.');
+        }
     }
 } 
