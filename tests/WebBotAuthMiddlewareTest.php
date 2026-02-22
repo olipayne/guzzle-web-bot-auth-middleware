@@ -14,7 +14,7 @@ class WebBotAuthMiddlewareTest extends TestCase
     private string $validBase64Ed25519Seed = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='; // 32 bytes of nulls, base64 encoded
     private string $validBase64Ed25519SecretKey = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='; // 64 bytes of nulls, base64 encoded
     private string $validKeyId = 'test-key-id';
-    private string $validSignatureAgent = 'https://example.com/.well-known/jwks.json';
+    private string $validSignatureAgent = 'https://example.com/.well-known/http-message-signatures-directory';
 
     protected function setUp(): void
     {

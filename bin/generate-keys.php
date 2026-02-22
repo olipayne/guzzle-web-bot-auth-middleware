@@ -99,7 +99,7 @@ echo "1. The base64 encoded private key (content of '{$privateKeyFilename}' or p
 echo "2. The 'keyId' above ('{$kid}') is passed to the middleware constructor.
 ";
 echo "3. The 'Full Ed25519 JWK' JSON above should be made available at your 'signatureAgent' URL.
-   (e.g., in a 'keys' array within a JSON object at https://your-bot.example.com/.well-known/jwks.json)
+   (e.g., in a 'keys' array within a JSON object at https://your-bot.example.com/.well-known/http-message-signatures-directory)
 ";
 
 exit(0);

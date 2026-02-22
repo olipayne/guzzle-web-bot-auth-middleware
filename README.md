@@ -71,11 +71,13 @@ This package includes a utility script to generate everything you need for Ed255
     ...
     ```
 
-3.  **Host Your Public Key (JWKSet)**
-    The `Signature-Agent` header in your requests will point to a URL where the server can fetch your public key (the "Full Ed25519 JWK" from the script) to verify the signature.
+3.  **Host Your Public Key Data for Signature-Agent**
+    The `Signature-Agent` header in your requests points to metadata that allows a verifier to discover your signing key.
 
-    A common practice is `https://your-bot.example.com/.well-known/jwks.json`.
-    The content of `jwks.json` should be:
+    A common path in existing deployments is `https://your-bot.example.com/.well-known/jwks.json`.
+    The current HTTP Message Signatures directory draft recommends `https://your-bot.example.com/.well-known/http-message-signatures-directory`.
+
+    If you expose a direct JWKSet URL, the content should be:
     ```json
     {
       "keys": [
@@ -141,7 +143,7 @@ $privateKeyPath = 'path/to/your/ed25519_private.key';
 // $base64PrivateKey = 'YOUR_BASE64_ENCODED_ED25519_PRIVATE_KEY_FROM_SCRIPT_OUTPUT';
 
 $keyId = 'YOUR_GENERATED_ED25519_KEY_ID'; // The JWK Thumbprint from the script output
-$signatureAgentUrl = 'https://your-bot.example.com/.well-known/jwks.json'; // URL to your public JWKSet
+$signatureAgentUrl = 'https://your-bot.example.com/.well-known/http-message-signatures-directory'; // Signature-Agent URL
 
 $botAuthMiddleware = new WebBotAuthMiddleware(
     $privateKeyPath, // or $base64PrivateKey

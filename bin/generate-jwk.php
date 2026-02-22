@@ -89,7 +89,7 @@ try {
 echo "--- Ed25519 JWK Details ---\n";
 echo "Input Base64 Public Key: {$base64PublicKey}\n\n";
 echo "JWK Thumbprint (kid):\n{$kid}\n\n";
-echo "Full Ed25519 JWK (for your .well-known/jwks.json file):\n";
+echo "Full Ed25519 JWK (for your .well-known/http-message-signatures-directory metadata):\n";
 echo $jwkJson . "\n";
 
 exit(0);

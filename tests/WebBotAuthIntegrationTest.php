@@ -51,7 +51,7 @@ class WebBotAuthIntegrationTest extends TestCase
         }
 
         [$base64SecretKey, $kid] = $this->generateTestKeys();
-        $signatureAgentUrl = 'https://example.com/.well-known/jwks.json'; // Dummy URL for this test
+        $signatureAgentUrl = 'https://example.com/.well-known/http-message-signatures-directory'; // Dummy URL for this test
 
         $stack = HandlerStack::create();
         $middleware = new WebBotAuthMiddleware(
