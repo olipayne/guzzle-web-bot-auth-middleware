@@ -29,8 +29,8 @@
     },
     "require-dev": {
         "php-cs-fixer/shim": "^3.89",
-        "phpstan/phpstan": "^1.12",
-        "phpstan/phpstan-strict-rules": "^1.6",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
