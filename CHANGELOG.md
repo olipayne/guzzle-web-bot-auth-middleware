@@ -2,6 +2,17 @@
 
 All notable changes are documented here. The project follows [Semantic Versioning](https://semver.org/), and Release Please maintains new entries from Conventional Commits.
 
+## [2.0.0](https://github.com/olipayne/guzzle-web-bot-auth-middleware/compare/v1.1.3...v2.0.0) (2026-08-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* implement current Web Bot Auth signature format
+
+### Added
+
+* implement current Web Bot Auth signature format ([b950842](https://github.com/olipayne/guzzle-web-bot-auth-middleware/commit/b9508424f2d6b0b41aabdf947a632187cc857978))
+
 ## [1.1.3](https://github.com/olipayne/guzzle-web-bot-auth-middleware/compare/v1.1.2...v1.1.3) (2026-02-22)
 
 - Added PHP CS Fixer and PHPStan QA tooling.
