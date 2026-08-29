@@ -2,6 +2,7 @@
     "name": "olipayne/guzzle-web-bot-auth-middleware",
     "description": "Guzzle middleware for HTTP Message Signatures (RFC9421) with web-bot-auth.",
     "type": "library",
+    "homepage": "https://github.com/olipayne/guzzle-web-bot-auth-middleware",
     "keywords": [
         "guzzle",
         "http",
@@ -11,9 +12,7 @@
         "web-bot-auth",
         "ed25519",
         "middleware",
-        "psr-7",
-        "psr-15",
-        "psr-18"
+        "psr-7"
     ],
     "license": "MIT",
     "authors": [
@@ -22,16 +21,20 @@
             "email": "olipayne@gmail.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/olipayne/guzzle-web-bot-auth-middleware/issues",
+        "source": "https://github.com/olipayne/guzzle-web-bot-auth-middleware"
+    },
     "require": {
         "php": "^7.4 || ^8.0",
-        "guzzlehttp/guzzle": "^7.0",
+        "guzzlehttp/guzzle": "^7.0 || ^8.0",
         "ext-sodium": "*"
     },
     "require-dev": {
-        "php-cs-fixer/shim": "^3.89",
-        "phpstan/phpstan": "^1.12",
-        "phpstan/phpstan-strict-rules": "^1.6",
-        "phpunit/phpunit": "^9.5"
+        "php-cs-fixer/shim": "^3.95",
+        "phpstan/phpstan": "^2.1.52",
+        "phpstan/phpstan-strict-rules": "^2.0.12",
+        "phpunit/phpunit": "^9.6.34"
     },
     "autoload": {
         "psr-4": {

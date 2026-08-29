@@ -11,16 +11,18 @@ use PHPUnit\Framework\TestCase;
 
 class WebBotAuthIntegrationTest extends TestCase
 {
-    private string $debugUrl = 'https://http-message-signatures-example.research.cloudflare.com/debug';
+    private string $verificationUrl = 'https://crawltest.com/cdn-cgi/web-bot-auth';
 
     /**
      * Helper to generate Ed25519 keys and kid for testing.
-     * Returns [base64SecretKey, kid]
+     * Returns [base64SecretKey, kid].
+     *
+     * @return array{string, string}
      */
     private function generateTestKeys(): array
     {
         if (!extension_loaded('sodium')) {
-            $this->markTestSkipped('Libsodium extension is not available.');
+            self::markTestSkipped('Libsodium extension is not available.');
         }
 
         $keypair = sodium_crypto_sign_keypair();
@@ -37,71 +39,48 @@ class WebBotAuthIntegrationTest extends TestCase
             'x'   => $x_b64url,
         ];
         ksort($jwkMembers);
-        $canonicalJson = json_encode($jwkMembers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $canonicalJson = json_encode(
+            $jwkMembers,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+        );
         $hash = hash('sha256', $canonicalJson, true);
         $kid = rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
 
         return [$base64SecretKey, $kid];
     }
 
-    public function testRequestToCloudflareDebugEndpointHasSignatureHeaders()
+    public function testCloudflareAcceptsLegacyWireFormatAsWellFormed(): void
     {
         if (!extension_loaded('sodium')) {
-            $this->markTestSkipped('Libsodium extension is not available.');
+            self::markTestSkipped('Libsodium extension is not available.');
         }
 
         [$base64SecretKey, $kid] = $this->generateTestKeys();
-        $signatureAgentUrl = 'https://example.com/.well-known/http-message-signatures-directory'; // Dummy URL for this test
+        $signatureAgentUrl = 'https://example.com/.well-known/http-message-signatures-directory';
 
         $stack = HandlerStack::create();
         $middleware = new WebBotAuthMiddleware(
             $base64SecretKey,
             $kid,
-            $signatureAgentUrl
+            $signatureAgentUrl,
+            'web-bot-auth',
+            300,
+            'sig',
+            'cloudflare_legacy'
         );
         $stack->push($middleware);
-        $client = new Client(['handler' => $stack]);
+        $client = new Client(['handler' => $stack, 'http_errors' => false]);
 
         try {
-            $response = $client->request('GET', $this->debugUrl);
-            $this->assertEquals(200, $response->getStatusCode());
-
-            $bodyContents = $response->getBody()->getContents();
-
-            // Parse plain text headers
-            $receivedHeaders = [];
-            $lines = explode("\n", trim($bodyContents));
-            foreach ($lines as $line) {
-                if (strpos($line, ':') !== false) {
-                    [$name, $value] = explode(':', $line, 2);
-                    $receivedHeaders[strtolower(trim($name))] = trim($value);
-                }
-            }
-
-            $this->assertNotEmpty($receivedHeaders, 'Could not parse any headers from the response body.');
-
-            // Check for our signature headers
-            $this->assertArrayHasKey('signature-agent', $receivedHeaders);
-            $this->assertEquals($signatureAgentUrl, $receivedHeaders['signature-agent']);
-
-            $this->assertArrayHasKey('signature-input', $receivedHeaders);
-            $this->assertStringStartsWith('sig=(', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('("@authority" "signature-agent")', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('created=', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('expires=', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('keyid="' . $kid . '"', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('alg="ed25519"', $receivedHeaders['signature-input']);
-            $this->assertStringContainsString('tag="web-bot-auth"', $receivedHeaders['signature-input']);
-
-            $this->assertArrayHasKey('signature', $receivedHeaders);
-            $this->assertStringStartsWith('sig=', $receivedHeaders['signature']);
-            // Validate base64 encoding of the signature value itself
-            $signatureValue = substr($receivedHeaders['signature'], 4); // remove "sig="
-            $this->assertTrue((bool)preg_match('/^[a-zA-Z0-9\+\/\=]+$/', $signatureValue), 'Signature value is not valid base64.');
-            $this->assertNotEmpty(base64_decode($signatureValue, true), 'Signature value is not valid base64 (strict decode failed).');
+            $response = $client->request('GET', $this->verificationUrl);
+            self::assertSame(
+                401,
+                $response->getStatusCode(),
+                'Cloudflare returns 400 for malformed signatures and 401 for a well-formed signature with an unknown key.'
+            );
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
-            $this->fail('Request to debug endpoint failed: ' . $e->getMessage());
+            self::fail('Request to Cloudflare verification endpoint failed: ' . $e->getMessage());
         }
     }
 }

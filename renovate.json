@@ -9,6 +9,13 @@
         "phpunit/phpunit"
       ],
       "allowedVersions": "/^9\\./"
+    },
+    {
+      "matchPackageNames": [
+        "phpstan/phpstan",
+        "phpstan/phpstan-strict-rules"
+      ],
+      "groupName": "PHPStan packages"
     }
   ]
 }

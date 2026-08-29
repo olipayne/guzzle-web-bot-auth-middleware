@@ -6,6 +6,7 @@
     <testsuites>
         <testsuite name="Unit">
             <file>./tests/WebBotAuthMiddlewareTest.php</file>
+            <file>./tests/KeyGenerationScriptsTest.php</file>
         </testsuite>
         <testsuite name="Integration">
             <file>./tests/WebBotAuthIntegrationTest.php</file>

@@ -1,0 +1,43 @@
+name: Release Please
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create or update release pull request
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Notify Packagist
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+          PACKAGIST_PACKAGE_URL: ${{ secrets.PACKAGIST_PACKAGE_URL }}
+        run: |
+          if [ -z "${PACKAGIST_USERNAME}" ] || [ -z "${PACKAGIST_TOKEN}" ]; then
+            echo "Packagist credentials are not configured; relying on the Packagist GitHub hook."
+            exit 0
+          fi
+
+          curl --fail --silent --show-error \
+            --request POST https://packagist.org/api/update-package \
+            --header "content-type: application/json" \
+            --header "authorization: Bearer ${PACKAGIST_USERNAME}:${PACKAGIST_TOKEN}" \
+            --user-agent "guzzle-web-bot-auth-middleware-release (mailto:olipayne@gmail.com)" \
+            --data "{\"repository\":\"${PACKAGIST_PACKAGE_URL:-https://github.com/${GITHUB_REPOSITORY}}\"}"

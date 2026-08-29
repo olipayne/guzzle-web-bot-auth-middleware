@@ -27,13 +27,17 @@ $publicKey = sodium_crypto_sign_publickey($keypair);   // This is the pk part, 3
 $base64SecretKey = base64_encode($secretKey);
 $base64PublicKey = base64_encode($publicKey);
 
-if (file_put_contents($privateKeyFilename, $base64SecretKey) === false) {
+if (file_put_contents($privateKeyFilename, $base64SecretKey, LOCK_EX) === false) {
     echo "Error: Could not save base64 encoded private key to {$privateKeyFilename}.\n";
+    exit(1);
+}
+if (!chmod($privateKeyFilename, 0600)) {
+    echo "Error: Could not restrict permissions on {$privateKeyFilename}.\n";
     exit(1);
 }
 echo "Base64 encoded Ed25519 private key saved to: {$privateKeyFilename} (Used by the middleware)\n";
 
-if (file_put_contents($publicKeyFilename, $base64PublicKey) === false) {
+if (file_put_contents($publicKeyFilename, $base64PublicKey, LOCK_EX) === false) {
     echo "Error: Could not save base64 encoded public key to {$publicKeyFilename}.\n";
     exit(1);
 }
@@ -64,7 +68,10 @@ function calculate_jwk_thumbprint_ed_genkeys(string $x_b64url): string
         'x'   => $x_b64url,
     ];
     ksort($jwkMembers); // Sort by key for canonical form (crv, kty, x)
-    $canonicalJson = json_encode($jwkMembers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    $canonicalJson = json_encode(
+        $jwkMembers,
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+    );
     $hash = hash('sha256', $canonicalJson, true);
     return base64url_encode_ed_genkeys($hash);
 }
@@ -76,7 +83,7 @@ $jwk = [
     'crv' => 'Ed25519',
     'x'   => $x_b64url,
     'kid' => $kid,
-    'alg' => 'Ed25519',
+    'alg' => 'ed25519',
     'use' => 'sig'
 ];
 
@@ -88,18 +95,17 @@ try {
 }
 
 echo "--- Configuration for WebBotAuthMiddleware (Ed25519) ---\n";
-echo "Base64 Encoded Ed25519 Private Key (content of '{$privateKeyFilename}', for middleware constructor):
-{$base64SecretKey}\n\n";
+echo "Private key: {$privateKeyFilename} (not printed; keep this file secret)\n\n";
 echo "JWK Thumbprint (use as 'keyId'):\n{$kid}\n\n";
-echo "Full Ed25519 JWK (host this at your 'signatureAgent' URL, typically in a JWKSet):\n";
+echo "Full Ed25519 JWK (publish this in your Signature Agent's JWKSet):\n";
 echo $jwkJson . "\n\n";
 echo "Instructions for use:\n";
-echo "1. The base64 encoded private key (content of '{$privateKeyFilename}' or printed above) is passed to the Guzzle middleware.
+echo "1. Pass '{$privateKeyFilename}' or its base64-encoded contents to the Guzzle middleware.
 ";
 echo "2. The 'keyId' above ('{$kid}') is passed to the middleware constructor.
 ";
-echo "3. The 'Full Ed25519 JWK' JSON above should be made available at your 'signatureAgent' URL.
-   (e.g., in a 'keys' array within a JSON object at https://your-bot.example.com/.well-known/http-message-signatures-directory)
+echo "3. Publish the JWK in a 'keys' array at the Signature Agent directory.
+   (By default: https://your-bot.example.com/.well-known/http-message-signatures-directory)
 ";
 
 exit(0);

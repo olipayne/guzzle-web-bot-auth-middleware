@@ -18,12 +18,15 @@ LICENSE*  eol=lf
 *.gif     binary
 
 # Paths to ignore when creating a zip/tar.gz archive from git
-/.github export-ignore
+/.github/** export-ignore
+/.release-please-manifest.json export-ignore
 /.editorconfig export-ignore
 /.gitattributes export-ignore
 /.php-cs-fixer.dist.php export-ignore
 /.php-cs-fixer.cache export-ignore
 /.phpunit.result.cache export-ignore
 /phpstan.neon.dist export-ignore
-/tests export-ignore
+/release-please-config.json export-ignore
+/renovate.json export-ignore
+/tests/** export-ignore
 /phpunit.xml.dist export-ignore

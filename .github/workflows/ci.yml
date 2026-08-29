@@ -4,51 +4,105 @@ name: PHP Composer CI
 
 on:
   push:
-    branches: [ "main", "master" ] # Adjust to your main branch name
-    tags: [ "v*.*.*" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main", "master" ] # Adjust to your main branch name
+    branches: ["main"]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5'] # Test against multiple PHP versions
+        php-version: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
 
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        extensions: sodium # Ensure sodium is enabled
-        tools: composer # Optionally install composer via this action
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          extensions: sodium
+          tools: composer
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Validate package metadata
+        run: composer validate --strict
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v5
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-${{ matrix.php-versions }}-
+      - name: Install latest compatible dependencies
+        run: composer update --prefer-dist --no-progress --no-interaction
 
-    - name: Install dependencies
-      run: composer update --prefer-dist --no-progress --no-interaction
+      - name: Run unit tests
+        run: composer test
 
-    - name: Run unit tests
-      run: composer test
+  lowest-dependencies:
+    runs-on: ubuntu-latest
 
-    - name: Run code style check
-      if: matrix.php-versions == '8.4'
-      run: composer lint
+    steps:
+      - uses: actions/checkout@v7
 
-    - name: Run static analysis
-      if: matrix.php-versions == '8.4'
-      run: composer phpstan
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          extensions: sodium
+          tools: composer
+
+      - name: Install lowest supported dependencies
+        run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-progress --no-interaction
+
+      - name: Run unit tests
+        run: composer test
+
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: sodium
+          tools: composer
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress --no-interaction
+
+      - name: Check coding style
+        run: composer lint
+
+      - name: Run static analysis
+        run: composer phpstan
+
+      - name: Audit production dependencies
+        run: composer audit --no-dev
+
+  integration:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: sodium
+          tools: composer
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress --no-interaction
+
+      - name: Run live transport test
+        run: composer test:integration
